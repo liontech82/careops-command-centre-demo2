@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>CareOps Command Centre — Demo 2</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.2.0/dist/tabler-icons.min.css" />
+<style>
+  :root {
+    --bg-page: #f4f3ee;
+    --bg-surface: #ffffff;
+    --bg-soft: #f1efe8;
+    --text-primary: #1f1e1b;
+    --text-secondary: #5f5e5a;
+    --border: rgba(31,30,27,0.12);
+    --border-strong: rgba(31,30,27,0.22);
+    --red-text: #a32d2d;
+    --red-bg: #fcebeb;
+    --amber-text: #854f0b;
+    --amber-bg: #faeeda;
+    --green-text: #3b6d11;
+    --green-bg: #eaf3de;
+    --lost-text: #6c6a63;
+    --lost-bg: #e8e4dc;
+    --radius-md: 8px;
+    --radius-lg: 12px;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; max-width: 100%; overflow-x: hidden; }
+  body {
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    background: var(--bg-page);
+    color: var(--text-primary);
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: 1180px; margin: 0 auto; padding: 20px 16px 48px; }
+  .hidden { display: none !important; }
+
+  .header {
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 16px; flex-wrap: wrap;
+    background: var(--bg-surface); border: 0.5px solid var(--border);
+    border-radius: var(--radius-lg); padding: 18px 20px; margin-bottom: 16px;
+  }
+  .header .eyebrow { margin: 0; font-size: 13px; color: var(--text-secondary); }
+  .header h1 { margin: 5px 0 0; font-size: 19px; font-weight: 500; }
+  .header .sub { margin: 3px 0 0; font-size: 13px; color: var(--text-secondary); max-width: 72ch; }
+  .risk-badge { text-align: center; border-radius: var(--radius-md); padding: 10px 18px; min-width: 96px; }
+  .risk-badge .lbl { margin: 0; font-size: 12px; }
+  .risk-badge .val { margin: 2px 0 0; font-size: 23px; font-weight: 500; }
+  .risk-badge .trend { margin: 0; font-size: 12px; }
+
+  .legend { display: flex; align-items: center; gap: 16px; margin: 0 0 12px; font-size: 12px; color: var(--text-secondary); flex-wrap: wrap; }
+  .legend .item { display: inline-flex; align-items: center; gap: 6px; }
+  .legend .dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
+  .legend .hint { margin-left: auto; }
+
+  .dashboard { display: grid; grid-template-columns: minmax(0, 1fr) 340px; gap: 16px; align-items: start; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; margin-bottom: 16px; }
+  .tile {
+    text-align: left; cursor: pointer; width: 100%; min-width: 0;
+    border: 0.5px solid var(--border); border-left: 3px solid var(--border-strong);
+    border-radius: 0; background: var(--bg-surface); padding: 14px;
+    font-family: inherit; color: inherit; transition: background 0.12s ease;
+  }
+  .tile:hover { background: var(--bg-soft); }
+  .tile:focus-visible, .back:focus-visible { outline: 2px solid var(--red-text); outline-offset: 2px; }
+  .tile .top { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; }
+  .tile .name { font-size: 14px; font-weight: 500; }
+  .tile .count { margin: 8px 0 0; font-size: 21px; font-weight: 500; }
+  .tile .desc { margin: 2px 0 0; font-size: 12px; color: var(--text-secondary); }
+  .tile.red { border-left-color: var(--red-text); }
+  .tile.amber { border-left-color: var(--amber-text); }
+  .tile.green { border-left-color: var(--green-text); }
+  .tile.lost { border-left-color: var(--lost-text); }
+  .tile.red .count, .tile.red .ic { color: var(--red-text); }
+  .tile.amber .count, .tile.amber .ic { color: var(--amber-text); }
+  .tile.green .count, .tile.green .ic { color: var(--green-text); }
+
+  .panel { background: var(--bg-surface); border: 0.5px solid var(--border); border-radius: var(--radius-lg); padding: 18px 20px; }
+  .panel-head { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; }
+  .panel-head .ttl { font-size: 16px; font-weight: 500; }
+  .panel-head .meta { margin-left: auto; font-size: 12px; color: var(--text-secondary); }
+
+  .action { display: flex; align-items: center; gap: 12px; padding: 10px 12px; border: 0.5px solid var(--border); border-radius: var(--radius-md); }
+  .action + .action { margin-top: 8px; }
+  .pri { width: 22px; height: 22px; border-radius: 50%; font-size: 12px; font-weight: 500; display: flex; align-items: center; justify-content: center; flex: 0 0 auto; }
+  .pri.red { background: var(--red-bg); color: var(--red-text); }
+  .pri.amber { background: var(--amber-bg); color: var(--amber-text); }
+  .pri.green { background: var(--green-bg); color: var(--green-text); }
+  .action .txt { font-size: 14px; min-width: 0; }
+  .action .due { margin-left: auto; font-size: 12px; flex: 0 0 auto; }
+  .action .due.red { color: var(--red-text); }
+  .action .due.amber { color: var(--amber-text); }
+  .action .due.green { color: var(--green-text); }
+
+  .back { display: inline-flex; align-items: center; gap: 5px; background: none; border: none; padding: 0; font: inherit; font-size: 13px; color: var(--text-secondary); cursor: pointer; }
+  .back:hover { color: var(--text-primary); }
+  .detail-head { display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; margin: 8px 0 16px; }
+  .detail-head h2 { margin: 5px 0 0; font-size: 19px; font-weight: 500; }
+  .detail-head p { margin: 4px 0 0; color: var(--text-secondary); font-size: 13px; max-width: 72ch; }
+  .pills { display: flex; gap: 10px; flex-wrap: wrap; }
+  .pill { text-align: center; border-radius: var(--radius-md); padding: 8px 14px; min-width: 64px; }
+  .pill .n { margin: 0; font-size: 21px; font-weight: 500; }
+  .pill .t { margin: 0; font-size: 12px; }
+  .pill.red { background: var(--red-bg); } .pill.red .n, .pill.red .t { color: var(--red-text); }
+  .pill.amber { background: var(--amber-bg); } .pill.amber .n, .pill.amber .t { color: var(--amber-text); }
+  .pill.green { background: var(--green-bg); } .pill.green .n, .pill.green .t { color: var(--green-text); }
+  .pill.lost { background: var(--lost-bg); } .pill.lost .n, .pill.lost .t { color: var(--lost-text); }
+
+  .rows { display: flex; flex-direction: column; gap: 8px; }
+  .row {
+    display: grid; grid-template-columns: 36px minmax(0, 1fr) auto; align-items: center; gap: 12px; padding: 12px 14px;
+    background: var(--bg-surface); border: 0.5px solid var(--border);
+    border-left: 3px solid var(--border-strong); border-radius: 0;
+  }
+  .row.red { border-left-color: var(--red-text); }
+  .row.amber { border-left-color: var(--amber-text); }
+  .row.green { border-left-color: var(--green-text); }
+  .row.lost { border-left-color: var(--lost-text); opacity: 0.86; }
+  .av { width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 500; flex: 0 0 auto; }
+  .av.red { background: var(--red-bg); color: var(--red-text); }
+  .av.amber { background: var(--amber-bg); color: var(--amber-text); }
+  .av.green { background: var(--green-bg); color: var(--green-text); }
+  .av.lost { background: var(--lost-bg); color: var(--lost-text); }
+  .row .body { min-width: 0; }
+  .row .nm { margin: 0; font-size: 14px; font-weight: 500; }
+  .row .nm .rl { font-size: 12px; color: var(--text-secondary); font-weight: 400; }
+  .row .dt { margin: 2px 0 0; font-size: 13px; }
+  .row .act { margin: 2px 0 0; font-size: 12px; color: var(--text-secondary); }
+  .row.red .dt { color: var(--red-text); }
+  .row.amber .dt { color: var(--amber-text); }
+  .row.green .dt { color: var(--text-secondary); }
+  .row.lost .dt { color: var(--lost-text); }
+  .tag { font-size: 11px; padding: 3px 8px; border-radius: var(--radius-md); flex: 0 0 auto; white-space: nowrap; }
+  .tag.red { background: var(--red-bg); color: var(--red-text); }
+  .tag.amber { background: var(--amber-bg); color: var(--amber-text); }
+  .tag.green { background: var(--green-bg); color: var(--green-text); }
+  .tag.lost { background: var(--lost-bg); color: var(--lost-text); }
+  .footnote { display: flex; align-items: flex-start; gap: 10px; padding: 12px 14px; background: var(--bg-soft); border-radius: var(--radius-md); margin-top: 12px; }
+  .footnote i { font-size: 18px; color: var(--green-text); flex: 0 0 auto; margin-top: 1px; }
+  .footnote p { margin: 0; font-size: 13px; color: var(--text-secondary); }
+
+  .loading { padding: 40px 0; text-align: center; color: var(--text-secondary); font-size: 14px; }
+
+  @media (max-width: 920px) {
+    .dashboard { grid-template-columns: 1fr; }
+  }
+  @media (max-width: 560px) {
+    .wrap { padding: 14px 12px 36px; }
+    .grid { grid-template-columns: 1fr; }
+    .header { padding: 16px; }
+    .risk-badge { flex: 1; }
+    .legend .hint { display: none; }
+    .panel { padding: 16px; }
+    .action { align-items: flex-start; }
+    .action .due { margin-left: 0; }
+    .row { grid-template-columns: 32px minmax(0, 1fr); align-items: start; }
+    .av { width: 32px; height: 32px; }
+    .tag { grid-column: 2; justify-self: start; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div id="app"><div class="loading">Loading command centre…</div></div>
+</div>
+
+<script>
+const STATUS_ORDER = { red: 0, amber: 1, lost: 2, green: 3 };
+const MODULE_ORDER = ['staffReadiness','trainingDbs','rotaGaps','missedEnquiries','recruitment','complianceEvidence','managerHandover','referralPipeline'];
+let RAW = null;
+let VIEW = null;
+
+function esc(s) {
+  return String(s ?? '').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+}
+function cap(s) { return String(s).charAt(0).toUpperCase() + String(s).slice(1); }
+function byId(items, key) { return Object.fromEntries((items || []).map(x => [x[key], x])); }
+function maxStatus(rows) { return rows.some(r => r.status === 'red') ? 'red' : rows.some(r => r.status === 'amber') ? 'amber' : 'green'; }
+function counts(rows) {
+  return rows.reduce((a, r) => { a[r.status] = (a[r.status] || 0) + 1; return a; }, { red: 0, amber: 0, lost: 0, green: 0 });
+}
+function sortRows(rows) {
+  return [...rows].sort((a, b) => (STATUS_ORDER[a.status] ?? 9) - (STATUS_ORDER[b.status] ?? 9) || a.name.localeCompare(b.name));
+}
+function initialsFrom(s) {
+  const parts = String(s || 'X').split(/\s+/).filter(Boolean);
+  return parts.length > 1 ? (parts[0][0] + parts[1][0]).toUpperCase() : parts[0].slice(0, 2).toUpperCase();
+}
+function row(status, initials, name, role, detail, action, tag, links = {}) {
+  return { status, initials, name, role, detail, action, tag, ...links };
+}
+function daysText(n) {
+  if (n < 0) return `expired ${Math.abs(n)} days ago`;
+  if (n === 0) return 'expires today';
+  return `expires in ${n} days`;
+}
+
+function buildView(data) {
+  const staff = data.staff || [];
+  const staffById = byId(staff, 'staff_id');
+  const training = data.training || [];
+  const trainingById = byId(training, 'training_id');
+  const referrals = data.referrals || [];
+
+  const blockedStaff = staff.filter(s => s.dbs_status === 'expired' || s.staff_file_status === 'blocked');
+  const activeOverdueReferrals = referrals.filter(r => r.status === 'new' && r.hours_since_received > 24);
+  const expiringTraining = training.filter(t => t.days_until_expiry <= 30);
+
+  const staffRows = [];
+  staff.forEach(s => {
+    if (s.dbs_status === 'expired') {
+      staffRows.push(row('red', s.initials, s.name, s.role, `DBS ${daysText(s.dbs_days_delta ?? -1)}. Person is not ready to work.`, 'Resolve DBS/file issue before assigning this staff member to shifts.', 'Blocked', { linked_staff_id: s.staff_id }));
+    } else if (s.staff_file_status === 'blocked') {
+      staffRows.push(row('red', s.initials, s.name, s.role, `${cap(s.reference_status)}. File blocks new shifts.`, s.next_action, 'Blocked', { linked_staff_id: s.staff_id }));
+    } else if (s.staff_file_status === 'amber' || String(s.right_to_work_status).includes('due') || s.supervision_status === 'overdue' || s.induction_status) {
+      const detail = s.supervision_status === 'overdue' ? 'Supervision note overdue.' : s.induction_status ? cap(s.induction_status) + '.' : cap(s.right_to_work_status) + '.';
+      staffRows.push(row('amber', s.initials, s.name, s.role, detail, s.next_action, 'Needs attention', { linked_staff_id: s.staff_id }));
+    } else {
+      staffRows.push(row('green', s.initials, s.name, s.role, 'Ready to work. Staff file checks found.', 'No action needed.', 'Ready', { linked_staff_id: s.staff_id }));
+    }
+  });
+
+  const trainingRows = [];
+  staff.filter(s => s.dbs_status === 'expired').forEach(s => {
+    trainingRows.push(row('red', s.initials, s.name, 'DBS', `DBS ${daysText(s.dbs_days_delta ?? -1)}. Renewal not started.`, 'Renew DBS before assigning shifts.', 'Expired', { linked_staff_id: s.staff_id }));
+  });
+  training.forEach(t => {
+    const s = staffById[t.linked_staff_id] || {};
+    const status = t.days_until_expiry < 0 ? 'red' : t.days_until_expiry <= 30 ? 'amber' : 'green';
+    trainingRows.push(row(status, s.initials || initialsFrom(s.name), s.name || 'Staff member', t.title, `${t.title} ${daysText(t.days_until_expiry)}. Evidence is ${String(t.evidence_status).replace('_', ' ')}.`, t.next_action, status === 'red' ? 'Expired' : status === 'amber' ? '≤30 days' : 'Current', { linked_staff_id: t.linked_staff_id, linked_training_id: t.training_id }));
+  });
+
+  const rotaRows = (data.rota_gaps || []).map(g => {
+    const s = staffById[g.assigned_staff_id];
+    if (g.assigned_staff_id && s && s.usable_for_rota === false) {
+      return row('red', s.initials, g.title, g.run, `${s.name} is assigned but is not usable for rota cover because DBS/file status blocks shifts.`, 'Find usable cover and update the rota system.', 'Rota risk', { linked_staff_id: s.staff_id, linked_record_id: g.rota_id });
+    }
+    if (g.cover_status === 'unfilled') {
+      return row('amber', g.title[0], g.title, g.run, 'Unfilled shift. Cover still needs confirming.', g.next_action, 'Open', { linked_record_id: g.rota_id });
+    }
+    return row('green', s ? s.initials : 'OK', g.title, g.run, 'Covered by usable staff.', 'No action needed.', 'Covered', { linked_staff_id: s && s.staff_id, linked_record_id: g.rota_id });
+  });
+
+  const referralToMissedRow = r => {
+    const status = r.status === 'lost' ? 'lost' : (r.status === 'new' && r.hours_since_received > 24) ? 'red' : r.status_flag === 'amber' ? 'amber' : 'green';
+    const detail = status === 'red' ? `${cap(r.source)} enquiry unanswered for ${r.hours_since_received}+ hours.` : status === 'lost' ? 'Lost enquiry. Kept out of active action items.' : `${cap(r.status)}. Follow-up position is known.`;
+    return row(status, initialsFrom(r.contact_name), r.contact_name, `${cap(r.source)} · ${r.service_type}`, detail, status === 'lost' ? 'No active action.' : r.next_action, status === 'lost' ? 'Lost' : status === 'red' ? 'Unanswered' : status === 'amber' ? 'Follow up' : 'On track', { linked_referral_id: r.referral_id, linked_enquiry_id: r.referral_id });
+  };
+  const missedRows = referrals.filter(r => ['private','website','phone','family'].includes(r.source)).map(referralToMissedRow);
+
+  const referralRows = referrals.map(r => {
+    const status = r.status === 'lost' ? 'lost' : (r.status === 'new' && r.hours_since_received > 24) ? 'red' : r.status_flag;
+    const detail = status === 'red' ? `${cap(r.source)} referral/enquiry has had no response for ${r.hours_since_received}+ hours.` : status === 'lost' ? 'Lost referral/enquiry. No active follow-up.' : `${cap(r.status)}. Assigned to ${r.assigned_to}.`;
+    return row(status, initialsFrom(r.contact_name), r.contact_name, `${cap(r.source)} · ${r.postcode_area}`, detail, status === 'lost' ? 'Record the reason and keep out of this week\'s active actions.' : r.next_action, status === 'lost' ? 'Lost' : cap(r.status), { linked_referral_id: r.referral_id });
+  });
+
+  const recruitmentRows = (data.recruitment || []).map(c => {
+    const s = staffById[c.linked_staff_id];
+    if (s && (s.staff_file_status === 'blocked' || s.dbs_status === 'expired')) {
+      const detail = s.dbs_status === 'expired' ? 'Linked staff record shows expired DBS.' : `Linked staff record shows ${s.reference_status}.`;
+      return row('red', c.initials, c.name, `${c.stage} · ${c.days_in_stage} days`, detail, s.next_action, 'Blocked', { linked_staff_id: c.linked_staff_id, linked_record_id: c.candidate_id });
+    }
+    return row(c.status, c.initials, c.name, `${c.stage} · ${c.days_in_stage} days`, c.blocker, c.next_action, c.status === 'red' ? 'Blocked' : c.status === 'amber' ? 'Stuck' : 'On track', { linked_staff_id: c.linked_staff_id, linked_record_id: c.candidate_id });
+  });
+
+  const complianceRows = (data.compliance_evidence || []).map(e => row(e.status, initialsFrom(e.title), e.title, e.category, e.detail, e.next_action, e.status === 'amber' ? 'Needs attention' : 'Current', { linked_training_id: e.linked_training_id, linked_staff_id: e.linked_staff_id, linked_record_id: e.evidence_id }));
+  training.filter(t => t.days_until_expiry <= 30 && ['missing','out of date','outdated'].includes(String(t.evidence_status).toLowerCase())).forEach(t => {
+    const s = staffById[t.linked_staff_id] || {};
+    complianceRows.push(row('amber', s.initials || initialsFrom(s.name), `${t.title} training evidence`, 'Training record', `${s.name}'s ${t.title} training evidence is ${String(t.evidence_status).replace('_', ' ')} and the course ${daysText(t.days_until_expiry)}.`, 'Book/update training evidence.', 'Needs attention', { linked_training_id: t.training_id, linked_staff_id: t.linked_staff_id, linked_record_id: t.training_id }));
+  });
+
+  const handoverRows = [];
+  (data.manager_handovers || []).forEach(h => handoverRows.push(row(h.status, initialsFrom(h.title), h.title, `Owner: ${h.owner} · due ${h.due_date}`, h.notes, 'Pass this on at handover.', cap(h.status), { linked_module: h.linked_module, linked_record_id: h.linked_record_id })));
+  blockedStaff.forEach(s => handoverRows.push(row('red', s.initials, `${s.name} cannot cover shifts until file issue is cleared`, `Owner: Manager · due this week`, s.dbs_status === 'expired' ? `${s.name} cannot cover shifts until DBS is renewed.` : `${s.name} cannot cover shifts until the blocked staff file is cleared.`, 'Resolve DBS/file issue before assigning this staff member to shifts.', 'Handover note', { linked_staff_id: s.staff_id, linked_module: 'staffReadiness', linked_record_id: s.staff_id })));
+  activeOverdueReferrals.forEach(r => handoverRows.push(row('red', initialsFrom(r.contact_name), `${r.contact_name} enquiry requires follow-up`, `Owner: ${r.assigned_to} · due today`, 'Private/family enquiry requires follow-up.', 'Call back this enquiry today.', 'Handover note', { linked_referral_id: r.referral_id, linked_module: 'referralPipeline', linked_record_id: r.referral_id })));
+  expiringTraining.filter(t => t.days_until_expiry <= 14).forEach(t => {
+    const s = staffById[t.linked_staff_id] || {};
+    handoverRows.push(row('amber', s.initials || initialsFrom(s.name), `${t.title} expiry needs booking`, `Owner: Admin · due this week`, `${s.name}'s ${t.title} training ${daysText(t.days_until_expiry)}.`, 'Book/update training evidence.', 'Handover note', { linked_staff_id: t.linked_staff_id, linked_training_id: t.training_id, linked_module: 'trainingDbs', linked_record_id: t.training_id }));
+  });
+
+  const actions = [];
+  activeOverdueReferrals.forEach((r, i) => actions.push({ priority: 0, status: 'red', text: `Call back ${r.contact_name} today.`, due: 'Today', linked_referral_id: r.referral_id }));
+  blockedStaff.forEach(s => actions.push({ priority: 0, status: 'red', text: `Resolve DBS/file issue before assigning ${s.name} to shifts.`, due: 'Today', linked_staff_id: s.staff_id }));
+  expiringTraining.filter(t => t.days_until_expiry <= 30).forEach(t => {
+    const s = staffById[t.linked_staff_id] || {};
+    actions.push({ priority: 0, status: t.days_until_expiry < 0 ? 'red' : 'amber', text: `Book/update training evidence for ${s.name} — ${t.title}.`, due: t.days_until_expiry <= 14 ? 'This week' : 'This month', linked_training_id: t.training_id, linked_staff_id: t.linked_staff_id });
+  });
+  (data.base_actions || []).forEach(a => actions.push({ ...a }));
+  actions.sort((a, b) => (STATUS_ORDER[a.status] ?? 9) - (STATUS_ORDER[b.status] ?? 9));
+  actions.forEach((a, i) => a.priority = i + 1);
+
+  function module(title, icon, explanation, rows, footnote, summaryOverride) {
+    const c = counts(rows);
+    const status = maxStatus(rows);
+    const headline = c.red ? `${c.red} red` : c.amber ? `${c.amber} amber` : c.lost ? `${c.lost} lost` : `${c.green} green`;
+    const summary = summaryOverride || (rows.find(r => r.status === 'red')?.detail || rows.find(r => r.status === 'amber')?.detail || 'Nothing needs attention right now.');
+    return { title, icon, status, headline, summary, counts: c, rows: sortRows(rows), footnote, explanation };
+  }
+
+  const modules = {
+    staffReadiness: module('Staff readiness', 'ti-user-check', 'Shows who is ready to work and who is blocked by missing or overdue staff checks.', staffRows, 'Staff readiness is derived from the staff records. DBS expiry and blocked file status also affect rota cover and handover notes.'),
+    trainingDbs: module('Training & DBS expiry', 'ti-id-badge-2', 'Shows DBS and training items that are expired, due soon or current.', trainingRows, 'DBS warnings come from the staff record. Training evidence warnings come from the training records.'),
+    rotaGaps: module('Rota gaps (7 days)', 'ti-calendar-event', 'Shows unfilled shifts and assigned shifts that are at risk because the named staff member is not usable for cover.', rotaRows, 'This does not replace the rota system. It highlights rota gaps and unsafe assignments that need manager attention.'),
+    missedEnquiries: module('Missed enquiries', 'ti-phone-call', 'Shows private, family, phone and website enquiries that need a response or follow-up.', missedRows, 'Missed enquiries are derived from the referral pipeline. Lost enquiries are grey and kept out of active action items.'),
+    recruitment: module('Recruitment', 'ti-users', 'Shows applicants and new starters that are stuck, blocked or on track.', recruitmentRows, 'Recruitment rows show where candidates need a chase before they go cold or block capacity.'),
+    complianceEvidence: module('Compliance evidence', 'ti-folder', 'Shows whether evidence can be found and whether records need updating.', complianceRows, 'This is about finding evidence quickly. It does not make inspection outcome claims.'),
+    managerHandover: module('Manager handover', 'ti-clipboard-list', 'Shows what the current or outgoing manager/coordinator needs to pass on this week.', handoverRows, 'Handover notes are generated from staff, referral and training issues, plus any standalone handover records.'),
+    referralPipeline: module('Referral pipeline', 'ti-route', 'Tracks private, council, hospital, family, website and phone referrals/enquiries that need a response, decision or follow-up.', referralRows, 'The referral pipeline feeds missed enquiries and action plan rows. Lost items remain visible but are not active actions.')
+  };
+
+  return { provider: data.provider, modules, actionPlan: actions };
+}
+
+function renderHome() {
+  const p = VIEW.provider;
+  const mods = VIEW.modules;
+  const reds = Object.values(mods).reduce((a, x) => a + (x.counts.red || 0), 0);
+  const ambers = Object.values(mods).reduce((a, x) => a + (x.counts.amber || 0), 0);
+  const lost = Object.values(mods).reduce((a, x) => a + (x.counts.lost || 0), 0);
+  const tiles = MODULE_ORDER.map(key => {
+    const mod = mods[key];
+    return `<button class="tile ${mod.status}" data-mod="${key}" aria-label="Open ${esc(mod.title)} detail">
+      <div class="top">
+        <span class="name">${esc(mod.title)}</span>
+        <i class="ti ${mod.icon} ic" style="font-size:18px" aria-hidden="true"></i>
+      </div>
+      <p class="count">${esc(mod.headline)}</p>
+      <p class="desc">${esc(mod.summary)}</p>
+    </button>`;
+  }).join('');
+  const actions = VIEW.actionPlan.map(a => `<div class="action">
+      <span class="pri ${a.status}">${a.priority}</span>
+      <span class="txt">${esc(a.text)}</span>
+      <span class="due ${a.status}">${esc(a.due)}</span>
+    </div>`).join('');
+  const trendIcon = p.riskTrend === 'improving' ? 'ti-arrow-down-right' : 'ti-arrow-up-right';
+  return `<div class="header">
+      <div>
+        <p class="eyebrow"><i class="ti ti-building" style="font-size:15px;vertical-align:-2px;margin-right:5px" aria-hidden="true"></i>CareOps Command Centre · ${esc(p.name)} (demo)</p>
+        <h1>${esc(p.weekLabel)} — ${reds} reds, ${ambers} ambers${lost ? `, ${lost} lost` : ''}</h1>
+        <p class="sub">${esc(p.summary)}</p>
+      </div>
+      <div class="risk-badge ${p.riskLevel}" style="background:var(--${p.riskLevel}-bg)">
+        <p class="lbl" style="color:var(--${p.riskLevel}-text)">Provider risk</p>
+        <p class="val" style="color:var(--${p.riskLevel}-text)">${cap(p.riskLevel)}</p>
+        <p class="trend" style="color:var(--${p.riskLevel}-text)"><i class="ti ${trendIcon}" style="font-size:13px;vertical-align:-1px" aria-hidden="true"></i> ${esc(p.riskTrend)}</p>
+      </div>
+    </div>
+    <div class="legend">
+      <span class="item"><span class="dot" style="background:var(--red-text)"></span>Act now</span>
+      <span class="item"><span class="dot" style="background:var(--amber-text)"></span>This week</span>
+      <span class="item"><span class="dot" style="background:var(--green-text)"></span>Nothing needed</span>
+      <span class="item"><span class="dot" style="background:var(--lost-text)"></span>Lost/closed</span>
+      <span class="hint">Tap any tile for detail</span>
+    </div>
+    <div class="dashboard">
+      <div><div class="grid">${tiles}</div></div>
+      <aside class="panel" aria-label="Weekly action plan">
+        <div class="panel-head">
+          <i class="ti ti-list-check" style="font-size:18px" aria-hidden="true"></i>
+          <span class="ttl">This week's action plan</span>
+          <span class="meta">built from the reds &amp; ambers above</span>
+        </div>
+        ${actions}
+      </aside>
+    </div>`;
+}
+
+function renderDetail(key) {
+  const mod = VIEW.modules[key];
+  const rows = sortRows(mod.rows);
+  const pill = (cls, n, t) => `<div class="pill ${cls}"><p class="n">${n || 0}</p><p class="t">${t}</p></div>`;
+  const rowHtml = rows.map(r => `<div class="row ${r.status}">
+      <div class="av ${r.status}">${esc(r.initials)}</div>
+      <div class="body">
+        <p class="nm">${esc(r.name)} <span class="rl">· ${esc(r.role)}</span></p>
+        <p class="dt">${esc(r.detail)}</p>
+        <p class="act">Next action: ${esc(r.action)}</p>
+      </div>
+      <span class="tag ${r.status}">${esc(r.tag)}</span>
+    </div>`).join('');
+  return `<button class="back" data-home="1"><i class="ti ti-arrow-left" style="font-size:15px" aria-hidden="true"></i> Back to overview</button>
+    <div class="detail-head">
+      <div>
+        <h2>${esc(VIEW.provider.name)} — ${esc(mod.title)}</h2>
+        <p>${esc(mod.explanation)}</p>
+      </div>
+      <div class="pills">
+        ${pill('red', mod.counts.red, 'red')}
+        ${pill('amber', mod.counts.amber, 'amber')}
+        ${pill('lost', mod.counts.lost, 'lost')}
+        ${pill('green', mod.counts.green, 'green')}
+      </div>
+    </div>
+    <div class="rows">${rowHtml}</div>
+    <div class="footnote"><i class="ti ti-info-circle" aria-hidden="true"></i><p>${esc(mod.footnote)}</p></div>`;
+}
+
+function show(view, key) {
+  const app = document.getElementById('app');
+  app.innerHTML = view === 'home' ? renderHome() : renderDetail(key);
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+  if (view === 'home') {
+    app.querySelectorAll('.tile').forEach(t => t.addEventListener('click', () => show('detail', t.dataset.mod)));
+  } else {
+    app.querySelector('[data-home]').addEventListener('click', () => show('home'));
+  }
+}
+
+fetch('data/mock.json')
+  .then(r => { if (!r.ok) throw new Error(r.status); return r.json(); })
+  .then(d => { RAW = d; VIEW = buildView(d); show('home'); })
+  .catch(err => {
+    document.getElementById('app').innerHTML = '<div class="loading">Could not load data/mock.json.<br>If opening the file directly, run a local HTTP server (see README) — browsers block file reads otherwise.</div>';
+    console.error(err);
+  });
+</script>
+</body>
+</html>
