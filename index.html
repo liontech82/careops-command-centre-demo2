@@ -6,7 +6,7 @@
 <title>CareOps Command Centre — Demo 2</title>
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500&display=swap" rel="stylesheet" />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800&display=swap" rel="stylesheet" />
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.2.0/dist/tabler-icons.min.css" />
 <style>
   :root {
@@ -25,6 +25,13 @@
     --green-bg: #eaf3de;
     --lost-text: #6c6a63;
     --lost-bg: #e8e4dc;
+    --header-bg: #121512;
+    --header-surface: rgba(255,255,255,0.07);
+    --header-surface-strong: rgba(255,255,255,0.1);
+    --header-border: rgba(255,255,255,0.16);
+    --header-text: #f8f3e8;
+    --header-muted: #c8c1b1;
+    --header-accent: #c8860d;
     --radius-md: 8px;
     --radius-lg: 12px;
   }
@@ -44,6 +51,12 @@
     --green-bg: rgba(59,109,17,0.24);
     --lost-text: #b4b2a9;
     --lost-bg: rgba(180,178,169,0.16);
+    --header-bg: #10130f;
+    --header-surface: rgba(255,255,255,0.08);
+    --header-surface-strong: rgba(255,255,255,0.12);
+    --header-border: rgba(255,255,255,0.18);
+    --header-text: #fbf6eb;
+    --header-muted: #cac2b3;
   }
   * { box-sizing: border-box; }
   html, body { margin: 0; padding: 0; max-width: 100%; overflow-x: hidden; }
@@ -58,27 +71,63 @@
   .hidden { display: none !important; }
 
   .header {
-    display: flex; align-items: center; justify-content: space-between;
-    gap: 16px; flex-wrap: wrap;
-    background: var(--bg-surface); border: 0.5px solid var(--border);
+    display: grid; grid-template-columns: minmax(220px, auto) minmax(190px, 1fr) auto;
+    align-items: stretch; gap: 16px;
+    background: linear-gradient(135deg, var(--header-bg), #1b201b);
+    border: 0.5px solid rgba(200,134,13,0.42);
     border-radius: var(--radius-lg); padding: 18px 20px; margin-bottom: 16px;
+    color: var(--header-text);
+    box-shadow: 0 18px 40px rgba(18,21,18,0.18);
   }
-  .header .eyebrow { margin: 0; font-size: 13px; color: var(--text-secondary); }
-  .header h1 { margin: 5px 0 0; font-size: 19px; font-weight: 500; }
-  .header .sub { margin: 3px 0 0; font-size: 13px; color: var(--text-secondary); max-width: 72ch; }
-  .risk-badge { text-align: center; border-radius: var(--radius-md); padding: 10px 18px; min-width: 96px; }
-  .risk-badge .lbl { margin: 0; font-size: 12px; }
-  .risk-badge .val { margin: 2px 0 0; font-size: 23px; font-weight: 500; }
-  .risk-badge .trend { margin: 0; font-size: 12px; }
-  .header-actions { display: flex; align-items: center; gap: 10px; margin-left: auto; }
+  .brand-lockup { display: flex; align-items: center; gap: 13px; min-width: 0; }
+  .medical-mark {
+    width: 48px; height: 48px; flex: 0 0 48px; padding: 8px;
+    color: var(--header-accent); background: rgba(200,134,13,0.12);
+    border: 0.5px solid rgba(200,134,13,0.5); border-radius: var(--radius-md);
+  }
+  .wordmark-wrap { min-width: 0; }
+  .wordmark {
+    margin: 0; font-size: 30px; line-height: 0.95;
+    font-weight: 800; color: var(--header-text);
+  }
+  .wordmark-sub {
+    margin: 3px 0 0; font-size: 11px; line-height: 1.2;
+    font-weight: 700; color: var(--header-muted);
+  }
+  .provider-plate {
+    align-self: center; min-width: 0; padding: 11px 14px;
+    background: var(--header-surface); border: 0.5px solid var(--header-border);
+    border-radius: var(--radius-md);
+  }
+  .provider-label { margin: 0; font-size: 11px; color: var(--header-muted); }
+  .provider-name {
+    margin: 2px 0 0; font-size: 18px; line-height: 1.2;
+    font-weight: 700; color: var(--header-text);
+  }
+  .header-actions { display: flex; align-items: stretch; gap: 10px; min-width: 0; }
+  .stat-strip {
+    display: grid; grid-template-columns: repeat(4, minmax(76px, 1fr));
+    min-width: min(100%, 520px);
+    border: 0.5px solid var(--header-border); border-radius: var(--radius-md);
+    overflow: hidden; background: var(--header-border);
+  }
+  .stat-cell { padding: 9px 12px; background: var(--header-surface); min-width: 0; }
+  .stat-label { margin: 0; font-size: 11px; color: var(--header-muted); white-space: nowrap; }
+  .stat-value {
+    margin: 2px 0 0; font-size: 15px; line-height: 1.2;
+    font-weight: 700; color: var(--header-text); overflow-wrap: anywhere;
+  }
+  .stat-cell.red .stat-value { color: #f2a0a0; }
+  .stat-cell.amber .stat-value { color: var(--header-accent); }
   .theme-toggle {
     width: 40px; height: 40px; border-radius: var(--radius-md);
-    border: 0.5px solid var(--border); background: var(--bg-surface);
-    color: var(--text-primary); cursor: pointer; display: inline-flex;
+    border: 0.5px solid rgba(255,255,255,0.26); background: rgba(255,255,255,0.11);
+    color: var(--header-text); cursor: pointer; display: inline-flex;
     align-items: center; justify-content: center; font: inherit;
+    flex: 0 0 40px; z-index: 1;
   }
-  .theme-toggle:hover { background: var(--bg-soft); }
-  .theme-toggle:focus-visible { outline: 2px solid var(--red-text); outline-offset: 2px; }
+  .theme-toggle:hover { background: var(--header-surface-strong); }
+  .theme-toggle:focus-visible { outline: 2px solid var(--header-accent); outline-offset: 2px; }
 
   .legend { display: flex; align-items: center; gap: 16px; margin: 0 0 12px; font-size: 12px; color: var(--text-secondary); flex-wrap: wrap; }
   .legend .item { display: inline-flex; align-items: center; gap: 6px; }
@@ -175,13 +224,20 @@
 
   @media (max-width: 920px) {
     .dashboard { grid-template-columns: 1fr; }
+    .header { grid-template-columns: minmax(0, 1fr) auto; }
+    .header-actions { grid-column: 1 / -1; }
+    .stat-strip { width: 100%; }
   }
   @media (max-width: 560px) {
     .wrap { padding: 14px 12px 36px; }
     .grid { grid-template-columns: 1fr; }
-    .header { padding: 16px; }
-    .header-actions { margin-left: 0; width: 100%; justify-content: flex-end; }
-    .risk-badge { flex: 1; }
+    .header { grid-template-columns: 1fr; padding: 16px; gap: 12px; position: relative; }
+    .brand-lockup { padding-right: 52px; }
+    .wordmark { font-size: 27px; }
+    .provider-plate { width: 100%; }
+    .header-actions { display: block; width: 100%; }
+    .theme-toggle { position: absolute; top: 16px; right: 16px; }
+    .stat-strip { grid-template-columns: repeat(2, minmax(0, 1fr)); min-width: 0; }
     .legend .hint { display: none; }
     .panel { padding: 16px; }
     .action { align-items: flex-start; }
@@ -233,6 +289,15 @@ function byId(items, key) { return Object.fromEntries((items || []).map(x => [x[
 function maxStatus(rows) { return rows.some(r => r.status === 'red') ? 'red' : rows.some(r => r.status === 'amber') ? 'amber' : 'green'; }
 function counts(rows) {
   return rows.reduce((a, r) => { a[r.status] = (a[r.status] || 0) + 1; return a; }, { red: 0, amber: 0, lost: 0, green: 0 });
+}
+function moduleTotals(modules) {
+  return Object.values(modules).reduce((a, x) => {
+    a.red += x.counts.red || 0;
+    a.amber += x.counts.amber || 0;
+    a.lost += x.counts.lost || 0;
+    a.green += x.counts.green || 0;
+    return a;
+  }, { red: 0, amber: 0, lost: 0, green: 0 });
 }
 function sortRows(rows) {
   return [...rows].sort((a, b) => (STATUS_ORDER[a.status] ?? 9) - (STATUS_ORDER[b.status] ?? 9) || a.name.localeCompare(b.name));
@@ -363,15 +428,13 @@ function buildView(data) {
     referralPipeline: module('Referral pipeline', 'ti-route', 'Tracks private, council, hospital, family, website and phone referrals/enquiries that need a response, decision or follow-up.', referralRows, 'The referral pipeline feeds missed enquiries and action plan rows. Lost items remain visible but are not active actions.')
   };
 
-  return { provider: data.provider, modules, actionPlan: actions };
+  return { provider: data.provider, modules, overview: moduleTotals(modules), actionPlan: actions };
 }
 
 function renderHome() {
   const p = VIEW.provider;
   const mods = VIEW.modules;
-  const reds = Object.values(mods).reduce((a, x) => a + (x.counts.red || 0), 0);
-  const ambers = Object.values(mods).reduce((a, x) => a + (x.counts.amber || 0), 0);
-  const lost = Object.values(mods).reduce((a, x) => a + (x.counts.lost || 0), 0);
+  const overview = VIEW.overview;
   const tiles = MODULE_ORDER.map(key => {
     const mod = mods[key];
     return `<button class="tile ${mod.status}" data-mod="${key}" aria-label="Open ${esc(mod.title)} detail">
@@ -388,19 +451,44 @@ function renderHome() {
       <span class="txt">${esc(a.text)}</span>
       <span class="due ${a.status}">${esc(a.due)}</span>
     </div>`).join('');
-  const trendIcon = p.riskTrend === 'improving' ? 'ti-arrow-down-right' : 'ti-arrow-up-right';
   return `<div class="header">
-      <div>
-        <p class="eyebrow"><i class="ti ti-building" style="font-size:15px;vertical-align:-2px;margin-right:5px" aria-hidden="true"></i>CareOps Command Centre · ${esc(p.name)} (demo)</p>
-        <h1>${esc(p.weekLabel)} — ${reds} reds, ${ambers} ambers${lost ? `, ${lost} lost` : ''}</h1>
-        <p class="sub">${esc(p.summary)}</p>
+      <div class="brand-lockup" aria-label="CareOps Command Centre">
+        <svg class="medical-mark" viewBox="0 0 48 48" aria-hidden="true">
+          <path d="M24 6v36" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/>
+          <path d="M16 13c-5 0-8 3-8 7 0 5 5 7 12 7" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M32 13c5 0 8 3 8 7 0 5-5 7-12 7" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M18 18c8 4 8 8 0 12" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M30 18c-8 4-8 8 0 12" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M19 36h10" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/>
+        </svg>
+        <div class="wordmark-wrap">
+          <p class="wordmark">CAREOPS</p>
+          <p class="wordmark-sub">COMMAND CENTRE</p>
+        </div>
+      </div>
+      <div class="provider-plate">
+        <p class="provider-label">Provider</p>
+        <p class="provider-name">${esc(p.name)}</p>
       </div>
       <div class="header-actions">
         <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch to dark mode"></button>
-        <div class="risk-badge ${p.riskLevel}" style="background:var(--${p.riskLevel}-bg)">
-          <p class="lbl" style="color:var(--${p.riskLevel}-text)">Provider risk</p>
-          <p class="val" style="color:var(--${p.riskLevel}-text)">${cap(p.riskLevel)}</p>
-          <p class="trend" style="color:var(--${p.riskLevel}-text)"><i class="ti ${trendIcon}" style="font-size:13px;vertical-align:-1px" aria-hidden="true"></i> ${esc(p.riskTrend)}</p>
+        <div class="stat-strip" aria-label="Provider summary">
+          <div class="stat-cell ${esc(p.riskLevel)}">
+            <p class="stat-label">Provider Risk</p>
+            <p class="stat-value">${esc(cap(p.riskLevel))} &middot; ${esc(p.riskTrend)}</p>
+          </div>
+          <div class="stat-cell red">
+            <p class="stat-label">Reds</p>
+            <p class="stat-value">${overview.red}</p>
+          </div>
+          <div class="stat-cell amber">
+            <p class="stat-label">Ambers</p>
+            <p class="stat-value">${overview.amber}</p>
+          </div>
+          <div class="stat-cell">
+            <p class="stat-label">Week of</p>
+            <p class="stat-value">${esc(p.weekLabel)}</p>
+          </div>
         </div>
       </div>
     </div>
