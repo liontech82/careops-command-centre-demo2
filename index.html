@@ -28,6 +28,23 @@
     --radius-md: 8px;
     --radius-lg: 12px;
   }
+  html[data-theme="dark"] {
+    --bg-page: #1a1a18;
+    --bg-surface: #232320;
+    --bg-soft: #2c2c28;
+    --text-primary: #f1efe8;
+    --text-secondary: #b4b2a9;
+    --border: rgba(241,239,232,0.14);
+    --border-strong: rgba(241,239,232,0.26);
+    --red-text: #f09595;
+    --red-bg: rgba(163,45,45,0.22);
+    --amber-text: #f0c069;
+    --amber-bg: rgba(133,79,11,0.24);
+    --green-text: #a8d977;
+    --green-bg: rgba(59,109,17,0.24);
+    --lost-text: #b4b2a9;
+    --lost-bg: rgba(180,178,169,0.16);
+  }
   * { box-sizing: border-box; }
   html, body { margin: 0; padding: 0; max-width: 100%; overflow-x: hidden; }
   body {
@@ -53,6 +70,15 @@
   .risk-badge .lbl { margin: 0; font-size: 12px; }
   .risk-badge .val { margin: 2px 0 0; font-size: 23px; font-weight: 500; }
   .risk-badge .trend { margin: 0; font-size: 12px; }
+  .header-actions { display: flex; align-items: center; gap: 10px; margin-left: auto; }
+  .theme-toggle {
+    width: 40px; height: 40px; border-radius: var(--radius-md);
+    border: 0.5px solid var(--border); background: var(--bg-surface);
+    color: var(--text-primary); cursor: pointer; display: inline-flex;
+    align-items: center; justify-content: center; font: inherit;
+  }
+  .theme-toggle:hover { background: var(--bg-soft); }
+  .theme-toggle:focus-visible { outline: 2px solid var(--red-text); outline-offset: 2px; }
 
   .legend { display: flex; align-items: center; gap: 16px; margin: 0 0 12px; font-size: 12px; color: var(--text-secondary); flex-wrap: wrap; }
   .legend .item { display: inline-flex; align-items: center; gap: 6px; }
@@ -154,6 +180,7 @@
     .wrap { padding: 14px 12px 36px; }
     .grid { grid-template-columns: 1fr; }
     .header { padding: 16px; }
+    .header-actions { margin-left: 0; width: 100%; justify-content: flex-end; }
     .risk-badge { flex: 1; }
     .legend .hint { display: none; }
     .panel { padding: 16px; }
@@ -175,6 +202,28 @@ const STATUS_ORDER = { red: 0, amber: 1, lost: 2, green: 3 };
 const MODULE_ORDER = ['staffReadiness','trainingDbs','rotaGaps','missedEnquiries','recruitment','complianceEvidence','managerHandover','referralPipeline'];
 let RAW = null;
 let VIEW = null;
+const THEME_KEY = 'careops-theme';
+
+function storedTheme() {
+  return localStorage.getItem(THEME_KEY) === 'dark' ? 'dark' : 'light';
+}
+function applyTheme(theme) {
+  document.documentElement.dataset.theme = theme;
+}
+function syncThemeToggle() {
+  const btn = document.querySelector('[data-theme-toggle]');
+  if (!btn) return;
+  const isDark = document.documentElement.dataset.theme === 'dark';
+  btn.setAttribute('aria-label', isDark ? 'Switch to light mode' : 'Switch to dark mode');
+  btn.innerHTML = `<i class="ti ${isDark ? 'ti-sun' : 'ti-moon'}" style="font-size:18px" aria-hidden="true"></i>`;
+}
+function toggleTheme() {
+  const next = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
+  localStorage.setItem(THEME_KEY, next);
+  applyTheme(next);
+  syncThemeToggle();
+}
+applyTheme(storedTheme());
 
 function esc(s) {
   return String(s ?? '').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
@@ -346,10 +395,13 @@ function renderHome() {
         <h1>${esc(p.weekLabel)} — ${reds} reds, ${ambers} ambers${lost ? `, ${lost} lost` : ''}</h1>
         <p class="sub">${esc(p.summary)}</p>
       </div>
-      <div class="risk-badge ${p.riskLevel}" style="background:var(--${p.riskLevel}-bg)">
-        <p class="lbl" style="color:var(--${p.riskLevel}-text)">Provider risk</p>
-        <p class="val" style="color:var(--${p.riskLevel}-text)">${cap(p.riskLevel)}</p>
-        <p class="trend" style="color:var(--${p.riskLevel}-text)"><i class="ti ${trendIcon}" style="font-size:13px;vertical-align:-1px" aria-hidden="true"></i> ${esc(p.riskTrend)}</p>
+      <div class="header-actions">
+        <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch to dark mode"></button>
+        <div class="risk-badge ${p.riskLevel}" style="background:var(--${p.riskLevel}-bg)">
+          <p class="lbl" style="color:var(--${p.riskLevel}-text)">Provider risk</p>
+          <p class="val" style="color:var(--${p.riskLevel}-text)">${cap(p.riskLevel)}</p>
+          <p class="trend" style="color:var(--${p.riskLevel}-text)"><i class="ti ${trendIcon}" style="font-size:13px;vertical-align:-1px" aria-hidden="true"></i> ${esc(p.riskTrend)}</p>
+        </div>
       </div>
     </div>
     <div class="legend">
@@ -408,6 +460,8 @@ function show(view, key) {
   window.scrollTo({ top: 0, behavior: 'smooth' });
   if (view === 'home') {
     app.querySelectorAll('.tile').forEach(t => t.addEventListener('click', () => show('detail', t.dataset.mod)));
+    syncThemeToggle();
+    app.querySelector('[data-theme-toggle]').addEventListener('click', toggleTheme);
   } else {
     app.querySelector('[data-home]').addEventListener('click', () => show('home'));
   }
